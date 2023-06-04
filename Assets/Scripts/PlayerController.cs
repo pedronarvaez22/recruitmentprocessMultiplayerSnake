@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public enum Direction
-    {
-        LEFT, RIGHT, UP, DOWN
-    }
-
     public Direction moveDirection;
 
     public Transform snakeHead;
@@ -34,16 +29,24 @@ public class PlayerController : MonoBehaviour
     //rewindTime
     private TimeController playerTime;
 
+    public enum Direction
+    {
+        Left,
+        Right,
+        Up,
+        Down
+    }
+
     private void OnEnable()
     {
         playerTailContainer = Instantiate(playerTailContainerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-        playerTime = this.GetComponent<TimeController>();
+        playerTime = GetComponent<TimeController>();
     }
 
     private void Start()
     {
         playerStepRateDefault = GameManager.Instance.delayStep;
-        snakeHead = this.gameObject.transform;
+        snakeHead = gameObject.transform;
         StartCoroutine(MoveSnake());
         foodCount = 0;
         enginePowerCount = 0;
@@ -58,17 +61,17 @@ public class PlayerController : MonoBehaviour
         {
             switch (moveDirection)
             {
-                case Direction.DOWN:
-                    moveDirection = Direction.LEFT;
+                case Direction.Down:
+                    moveDirection = Direction.Left;
                     break;
-                case Direction.UP:
-                    moveDirection = Direction.RIGHT;
+                case Direction.Up:
+                    moveDirection = Direction.Right;
                     break;
-                case Direction.LEFT:
-                    moveDirection = Direction.UP;
+                case Direction.Left:
+                    moveDirection = Direction.Up;
                     break;
-                case Direction.RIGHT:
-                    moveDirection = Direction.DOWN;
+                case Direction.Right:
+                    moveDirection = Direction.Down;
                     break;
             }
         }
@@ -77,17 +80,17 @@ public class PlayerController : MonoBehaviour
         {
             switch (moveDirection)
             {
-                case Direction.DOWN:
-                    moveDirection = Direction.RIGHT;
+                case Direction.Down:
+                    moveDirection = Direction.Right;
                     break;
-                case Direction.UP:
-                    moveDirection = Direction.LEFT;
+                case Direction.Up:
+                    moveDirection = Direction.Left;
                     break;
-                case Direction.LEFT:
-                    moveDirection = Direction.DOWN;
+                case Direction.Left:
+                    moveDirection = Direction.Down;
                     break;
-                case Direction.RIGHT:
-                    moveDirection = Direction.UP;
+                case Direction.Right:
+                    moveDirection = Direction.Up;
                     break;
             }
         }
@@ -112,40 +115,40 @@ public class PlayerController : MonoBehaviour
         playerTime.isReversing = false;
     }
 
-    private IEnumerator MoveSnake()
+    public IEnumerator MoveSnake()
     {
         yield return new WaitForSeconds(playerStepRateDefault);
-        Vector3 nextPos = Vector3.zero;
+        var nextPos = Vector3.zero;
 
         switch (moveDirection)
         {
-            case Direction.DOWN:
+            case Direction.Down:
                 nextPos = Vector3.down;
                 snakeHead.rotation = Quaternion.Euler(0, 0, 90);
                 break;
-            case Direction.LEFT:
+            case Direction.Left:
                 nextPos = Vector3.left;
                 snakeHead.rotation = Quaternion.Euler(0, 0, 0);
                 break;
-            case Direction.RIGHT:
+            case Direction.Right:
                 nextPos = Vector3.right;
                 snakeHead.rotation = Quaternion.Euler(0, 0, 180);
                 break;
-            case Direction.UP:
+            case Direction.Up:
                 nextPos = Vector3.up;
                 snakeHead.rotation = Quaternion.Euler(0, 0, -90);
                 break;
         }
 
-        nextPos = nextPos * GameManager.Instance.step;
-        _lastPos = snakeHead.position;
-        snakeHead.position += nextPos;
+        nextPos *= GameManager.Instance.step;
+        var position = snakeHead.position;
+        _lastPos = position;
+        position += nextPos;
+        snakeHead.position = position;
 
-        foreach (Transform t in snakeTail)
+        foreach (var t in snakeTail)
         {
-            Vector3 temp = t.position;
-            t.position = _lastPos;
-            _lastPos = temp;
+            (t.position, _lastPos) = (_lastPos, t.position);
             t.gameObject.GetComponent<BoxCollider2D>().enabled = true;
         }
 
@@ -173,7 +176,7 @@ public class PlayerController : MonoBehaviour
 
         GameObject temp = Instantiate(_tailPrefab, tailPosition, transform.localRotation);
         temp.transform.parent = playerTailContainer.transform;
-        temp.GetComponent<PlayerTail>().TailID(this.gameObject);
+        temp.GetComponent<PlayerTail>().TailID(gameObject);
         snakeTail.Add(temp.transform);
 
         switch(foodID)
@@ -226,7 +229,7 @@ public class PlayerController : MonoBehaviour
         GameManager.Instance.activePlayers.Remove(this);
         GameManager.Instance.RefreshPlayers();
         Destroy(playerTailContainer);
-        Destroy(this.gameObject);
+        Destroy(gameObject);
         foreach (Transform t in snakeTail)
         {
             Destroy(t.gameObject);
@@ -253,19 +256,19 @@ public class PlayerController : MonoBehaviour
                     RefreshPowerUps();
                 }
                 else if(!hasBatteringRam && hasTimeTravel)
-                {
-                    timeTravelCount--;
-                    StartCoroutine(RewindTime());
-                    RefreshPowerUps();
-                }
-                else if(hasBatteringRam && hasTimeTravel)
-                {
-                    pc.GetComponent<PlayerController>().Die();
-                    batteringRamCount--;
-                    RefreshPowerUps();
-                }
-                else if(!hasBatteringRam && !hasTimeTravel)
-                    Die();
+                    {
+                        timeTravelCount--;
+                        StartCoroutine(RewindTime());
+                        RefreshPowerUps();
+                    }
+                    else if(hasBatteringRam && hasTimeTravel)
+                        {
+                            pc.GetComponent<PlayerController>().Die();
+                            batteringRamCount--;
+                            RefreshPowerUps();
+                        }
+                        else if(!hasBatteringRam && !hasTimeTravel)
+                            Die();
                 break;
 
             case "Bounds":
@@ -288,22 +291,22 @@ public class PlayerController : MonoBehaviour
                     RefreshPowerUps();
                 }
                 else if(!hasBatteringRam && hasTimeTravel)
-                {
-                    timeTravelCount--;
-                    StartCoroutine(RewindTime());
-                    RefreshPowerUps();
-                }
-                else if(hasBatteringRam && hasTimeTravel)
-                {
-                    GameObject cpuref = GameObject.Find("CPU(Clone)");
-                    cpuref.GetComponent<CPU>().Die();
-                    batteringRamCount--;
-                    RefreshPowerUps();
-                }
-                else if(!hasBatteringRam && !hasTimeTravel)
-                {
-                    Die();
-                }
+                    {
+                        timeTravelCount--;
+                        StartCoroutine(RewindTime());
+                        RefreshPowerUps();
+                    }
+                    else if(hasBatteringRam && hasTimeTravel)
+                        {
+                            GameObject cpuref = GameObject.Find("CPU(Clone)");
+                            cpuref.GetComponent<CPU>().Die();
+                            batteringRamCount--;
+                            RefreshPowerUps();
+                        }
+                        else if(!hasBatteringRam && !hasTimeTravel)
+                        {
+                            Die();
+                        }
                 break;
         }
     }

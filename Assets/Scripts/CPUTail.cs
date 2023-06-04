@@ -10,8 +10,8 @@ public class CPUTail : MonoBehaviour
     {
         if(objRef != null)
         {
-            this.transform.position = Vector3.Lerp(this.transform.position, objRef.position, 3 * Time.deltaTime);
-            this.transform.rotation = Quaternion.Slerp(this.transform.rotation, objRef.rotation, 3 * Time.deltaTime);
+            transform.position = Vector3.Lerp(transform.position, objRef.position, 3 * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, objRef.rotation, 3 * Time.deltaTime);
         }
 
     }

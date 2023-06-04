@@ -176,13 +176,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35589e537c8f86e4ea6b256d16457631, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _S2A: {fileID: 0}
   snakeHead: {fileID: 815970150611375707}
+  tailPrefab: {fileID: 6814630489684466306, guid: 5c52815a96fc30b4d90a449d563d8283, type: 3}
+  tailContainer: {fileID: 0}
+  s2A: {fileID: 815970150611375703}
   snakeTail: []
-  _tailPrefab: {fileID: 6814630489684466306, guid: 5c52815a96fc30b4d90a449d563d8283, type: 3}
-  cpuDied: 0
-  speedMultiplier: 0
-  _tailContainer: {fileID: 0}
 --- !u!1 &815970150936655116
 GameObject:
   m_ObjectHideFlags: 0

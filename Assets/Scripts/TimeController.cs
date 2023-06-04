@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class TimeController : MonoBehaviour
 {
-    public bool isReversing = false;
+    public bool isReversing;
     public float recordTime = 5f;
 
-    List<PointInTime> pointsInTime;
+    private List<PointInTime> _pointsInTime;
 
     private void Start()
     {
-        pointsInTime = new List<PointInTime>();
+        _pointsInTime = new List<PointInTime>();
     }
 
     private void FixedUpdate()
@@ -28,22 +28,22 @@ public class TimeController : MonoBehaviour
 
     private void Record()
     {   
-        if(pointsInTime.Count > Mathf.Round(recordTime / Time.fixedDeltaTime))
+        if(_pointsInTime.Count > Mathf.Round(recordTime / Time.fixedDeltaTime))
         {
-            pointsInTime.RemoveAt(pointsInTime.Count - 1);
+            _pointsInTime.RemoveAt(_pointsInTime.Count - 1);
         }
 
-        pointsInTime.Insert(0, new PointInTime(transform.position, transform.rotation));
+        _pointsInTime.Insert(0, new PointInTime(transform.position, transform.rotation));
     }
 
     private void Rewind()
     {
-        if(pointsInTime.Count > 0)
+        if(_pointsInTime.Count > 0)
         {
-            PointInTime pointInTime = pointsInTime[0];
-            transform.position = pointInTime.position;
-            transform.rotation = pointInTime.rotation;
-            pointsInTime.RemoveAt(0);
+            PointInTime pointInTime = _pointsInTime[0];
+            transform.position = pointInTime.Position;
+            transform.rotation = pointInTime.Rotation;
+            _pointsInTime.RemoveAt(0);
         }
         else
         {

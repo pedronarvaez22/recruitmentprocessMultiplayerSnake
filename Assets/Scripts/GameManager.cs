@@ -18,43 +18,48 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public enum Direction
-    {
-        LEFT, RIGHT, UP, DOWN
-    }
-
-    public float delayStep;
-    public float step;
-
-    public Transform Food;
-    public int foodID;
-
-    public int col = 29;
-    public int rows = 15;
-
-    private int _score;
+    [SerializeField]
+    private PlayerController playerToSpawn;
 
     [SerializeField]
-    private PlayerController _playerToSpawn;
-    KeyCode keyUpTemp, keyRightTemp;
+    private GameObject CPUPrefab;
+
+    [SerializeField]
+    private Transform cpuTailContainerTransform;
+    public Transform CpuTailContainerTransform => cpuTailContainerTransform;
+
+    [SerializeField]
+    private UIManager uiManager;
+
+    [SerializeField]
+    private SpriteRenderer foodSpriteRenderer;
+
     [SerializeField]
     private float holdTimer;
     [SerializeField]
     private float holdDuration = 2f;
 
-    private bool _gameAboutToStart;
-    public bool _gameOver;
+    public Transform food;
 
-    [SerializeField]
-    private UIManager _uiManager;
+    public int foodID;
+    public int col = 29;
+    public int rows = 15;
+
+    public float delayStep;
+    public float step;
+    public float cpuDeathTimer = 5f;
+
+    public bool cpuDied;
+    public bool gameOver;
 
     public List<PlayerController> activePlayers;
 
-    public float cpuDeathTimer = 5f;
-    [SerializeField]
-    private GameObject CPUPrefab;
-    public bool cpuDied;
+    private bool _gameAboutToStart;
+
     private CPU _cpu;
+
+    private KeyCode _keyUpTemp;
+    private KeyCode _keyRightTemp;
 
     private void Awake()
     {
@@ -67,14 +72,12 @@ public class GameManager : MonoBehaviour
         holdDuration = 2f;
         Instantiate(CPUPrefab, new Vector3(2, 2, 1), Quaternion.identity);
         _gameAboutToStart = true;
-        _gameOver = true;
-        _uiManager = UIManager.FindObjectOfType<UIManager>();
+        gameOver = true;
     }
 
     public void SetFood()
     {
         foodID = Random.Range(0, 4);
-        SpriteRenderer foodSpriteRenderer = Food.GetComponent<SpriteRenderer>();
 
         switch(foodID)
         {
@@ -93,26 +96,26 @@ public class GameManager : MonoBehaviour
 
         }
 
-        int xMin = (col - 1) / 2 * -1;
-        int xMax = (col - 1) / 2;
-        int x = Random.Range( xMin, xMax);
+        var xMin = (col - 1) / 2 * -1;
+        var xMax = (col - 1) / 2;
+        var x = Random.Range( xMin, xMax);
 
-        int yMin = (rows - 1) / 2 * -1;
-        int yMax = (rows - 1) / 2;
-        int y = Random.Range(yMin, yMax);
+        var yMin = (rows - 1) / 2 * -1;
+        var yMax = (rows - 1) / 2;
+        var y = Random.Range(yMin, yMax);
 
-        Food.position = new Vector2(x * step, y * step);
+        food.position = new Vector2(x * step, y * step);
     }
 
     public void AddNewPlayer(PlayerController newPlayer, KeyCode keyUp, KeyCode keyRight)
     {
-        int xMin = (col - 1) / 2 * -1;
-        int xMax = (col - 1) / 2;
-        int x = Random.Range(xMin, xMax);
+        var xMin = (col - 1) / 2 * -1;
+        var xMax = (col - 1) / 2;
+        var x = Random.Range(xMin, xMax);
 
-        int yMin = (rows - 1) / 2 * -1;
-        int yMax = (rows - 1) / 2;
-        int y = Random.Range(yMin, yMax);
+        var yMin = (rows - 1) / 2 * -1;
+        var yMax = (rows - 1) / 2;
+        var y = Random.Range(yMin, yMax);
 
         newPlayer.keyUp = keyUp;
         newPlayer.keyRight = keyRight;
@@ -120,7 +123,7 @@ public class GameManager : MonoBehaviour
         newPlayerInScene = Instantiate(newPlayer, new Vector2(x * step, y * step), Quaternion.identity);
         activePlayers.Add(newPlayerInScene);
         _gameAboutToStart = false;
-        _uiManager.InstructionsText.gameObject.SetActive(false);
+        uiManager.InstructionsText.gameObject.SetActive(false);
     }
 
     public void RefreshPlayers()
@@ -133,19 +136,19 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        _gameOver = true;
-        _uiManager.gameOverPanel.SetActive(true);
+        gameOver = true;
+        uiManager.gameOverPanel.SetActive(true);
         Time.timeScale = 0;
     }
 
     public void RestartGame()
     {
-        _gameOver = false;
-        _uiManager.gameOverPanel.SetActive(false);
+        gameOver = false;
+        uiManager.gameOverPanel.SetActive(false);
         _cpu = CPU.FindObjectOfType<CPU>();
         if(_cpu != null)
             _cpu.Die();
-        _uiManager.InstructionsText.gameObject.SetActive(true);
+        uiManager.InstructionsText.gameObject.SetActive(true);
         Time.timeScale = 1;
         SetFood();
     }
@@ -175,27 +178,27 @@ public class GameManager : MonoBehaviour
 
         foreach (KeyCode vkey in System.Enum.GetValues(typeof(KeyCode)))
         {
-            if (Input.GetKey(vkey) && keyUpTemp == KeyCode.None)
+            if (Input.GetKey(vkey) && _keyUpTemp == KeyCode.None)
             {
                 holdTimer += Time.deltaTime;
 
                 if(holdTimer > holdDuration)
-                    keyUpTemp = vkey;
+                    _keyUpTemp = vkey;
             }
-            else if (Input.GetKey(vkey) && keyUpTemp != KeyCode.None)
+            else if (Input.GetKey(vkey) && _keyUpTemp != KeyCode.None)
+                {
+                    if (holdTimer > holdDuration)
+                        _keyRightTemp = vkey;
+                }
+                else if(Input.GetKeyUp(vkey))
+                {
+                    holdTimer = 0;
+                }
+            if(_keyUpTemp != KeyCode.None && _keyRightTemp != KeyCode.None && gameOver == false)
             {
-                if (holdTimer > holdDuration)
-                    keyRightTemp = vkey;
-            }
-            else if(Input.GetKeyUp(vkey))
-            {
-                holdTimer = 0;
-            }
-            if(keyUpTemp != KeyCode.None && keyRightTemp != KeyCode.None && _gameOver == false)
-            {
-                AddNewPlayer(_playerToSpawn, keyUpTemp, keyRightTemp);
-                keyUpTemp = KeyCode.None;
-                keyRightTemp = KeyCode.None;
+                AddNewPlayer(playerToSpawn, _keyUpTemp, _keyRightTemp);
+                _keyUpTemp = KeyCode.None;
+                _keyRightTemp = KeyCode.None;
                 holdTimer = 0;
             }
 

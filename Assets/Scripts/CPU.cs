@@ -6,38 +6,24 @@ using SAP2D;
 public class CPU : MonoBehaviour
 {
     [SerializeField]
-    private SAP2DAgent _S2A;
+    private Transform snakeHead;
+    [SerializeField]
+    private GameObject tailPrefab;
 
-    public Transform snakeHead;
+    [SerializeField]
+    private SAP2DAgent s2A;
 
     public List<Transform> snakeTail;
-    [SerializeField]
-    private GameObject _tailPrefab;
 
-    public bool cpuDied;
-
-    [SerializeField]
-    private GameObject _tailContainer;
-
-    private void Awake()
-    {
-        _S2A = GetComponent<SAP2DAgent>();
-        cpuDied = false;
-        _S2A.Target = GameObject.FindGameObjectWithTag("Food").GetComponent<Transform>();
-    }
     private void OnEnable()
     {
-        _S2A.Target = GameObject.FindGameObjectWithTag("Food").GetComponent<Transform>();
-        _tailContainer = GameObject.Find("CPUTailContainer");
+        s2A.Target = GameManager.Instance.food;
     }
 
-    private void AdjustSpeed(bool isEnginePower)
+    private void AdjustSpeed()
     {
-        if (!isEnginePower)
-        {
-            float newSpeedPenalty = 0.01f;
-            _S2A.MovementSpeed -= newSpeedPenalty;
-        }
+        float newSpeedPenalty = 0.01f;
+        s2A.MovementSpeed -= newSpeedPenalty;
     }
 
     private void Eat(int foodID)
@@ -49,9 +35,9 @@ public class CPU : MonoBehaviour
             tailPosition = snakeTail[snakeTail.Count - 1].position;
         }
 
-        GameObject temp = Instantiate(_tailPrefab, tailPosition, transform.localRotation);
+        GameObject temp = Instantiate(tailPrefab, tailPosition, transform.localRotation);
         int snakeTailIndex = snakeTail.Count;
-        temp.transform.parent = _tailContainer.transform;
+        temp.transform.parent = GameManager.Instance.CpuTailContainerTransform;
 
         snakeTail.Add(temp.transform);
 
@@ -64,11 +50,10 @@ public class CPU : MonoBehaviour
             snakeTail[snakeTailIndex].GetComponent<CPUTail>().objRef = snakeTail[snakeTailIndex - 1].transform;
         }
 
-        if (foodID == 1)
-            AdjustSpeed(true);
-        else
-            AdjustSpeed(false);
-            
+        if (foodID != 1)
+        {
+            AdjustSpeed();
+        }
 
         GameManager.Instance.SetFood();
     }
@@ -80,7 +65,7 @@ public class CPU : MonoBehaviour
             Destroy(t.gameObject);
         }
         GameManager.Instance.cpuDied = true;
-        Destroy(this.gameObject);
+        Destroy(gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

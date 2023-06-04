@@ -5,5 +5,5 @@ using UnityEngine;
 public class Head : MonoBehaviour
 {
     [SerializeField]
-    private GameManager _gameManager;
+    private GameManager gameManager;
 }

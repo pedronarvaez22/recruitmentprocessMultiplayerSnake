@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [SerializeField]
-    private Text InstructionsText;
+    private Text instructionsText;
+    public Text InstructionsText => instructionsText;
+
     public GameObject gameOverPanel;
 }
